@@ -1,0 +1,8 @@
+-r requirements.txt
+
+assertpy
+pytest-cov
+mypy
+pylint
+flake8
+bandit

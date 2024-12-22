@@ -5,7 +5,12 @@ Matt's Really Cool PDF Utility
 import argparse
 import sys
 
-from . import main
+from . import flatten
+from . import parse_ranges
+from . import pdf_delete
+from . import pdf_extract
+from . import pdf_merge
+from . import pdf_rotate
 
 
 def run(argv: list[str]) -> None:
@@ -66,7 +71,19 @@ def run(argv: list[str]) -> None:
                                   nargs='+',
                                   default=[])
 
-    main(arg_parser.parse_args(argv))
+    args = arg_parser.parse_args(argv)
+
+    if args.command == "merge":
+        pdf_merge(inputs=args.input, output=args.output)
+    elif args.command == "extract":
+        pdf_extract(input=args.input, output=args.output,
+                    pages=flatten(list(map(parse_ranges, args.pages))))
+    elif args.command == "rotate":
+        pdf_rotate(input=args.input, output=args.output,
+                   pages=flatten(list(map(parse_ranges, args.pages))))
+    elif args.command == "delete":
+        pdf_delete(input=args.input, output=args.output,
+                   pages=flatten(list(map(parse_ranges, args.pages))))
 
 
 if __name__ == '__main__':
