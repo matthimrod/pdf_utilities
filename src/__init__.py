@@ -5,7 +5,7 @@ Matt's PDF Library of Functions That Probably Already Exist Elsewhere
 import re
 from argparse import Namespace
 
-import PyPDF2
+from pypdf import PdfReader, PdfWriter
 
 
 def main(args: Namespace) -> None:
@@ -15,13 +15,13 @@ def main(args: Namespace) -> None:
     :type args: Namespace
     """
     if args.command == "merge":
-        cmd_merge(args)
+        pdf_merge(args)
     elif args.command == "extract":
-        cmd_extract(args)
+        pdf_extract(args)
     elif args.command == "rotate":
-        cmd_rotate(args)
+        pdf_rotate(args)
     elif args.command == "delete":
-        cmd_delete(args)
+        pdf_delete(args)
 
 
 def parse_ranges(page_string: str) -> list | int:
@@ -45,7 +45,7 @@ def flatten(input_list: list) -> list:
     Flattens nested lists into a single list
     :param input_list: A list that may contain other lists
     :type input_list: list
-    :return: The flattened list
+    :return: The list, flattened
     :rtype: list
     """
     result = []
@@ -58,30 +58,30 @@ def flatten(input_list: list) -> list:
     return result
 
 
-def cmd_merge(args: Namespace) -> None:
+def pdf_merge(args: Namespace) -> None:
     """
     Merge two or more PDFs
     :param args: Argparse Results
     :type args: Namespace
     """
-    merger = PyPDF2.PdfFileMerger()
+    merger = PdfWriter()
     for filename in args.input:
         print(f'Reading {filename}')
-        merger.append(PyPDF2.PdfReader(filename))
+        merger.append(PdfReader(filename))
 
     print(f'Writing {args.output}')
     merger.write(args.output)
 
 
-def cmd_extract(args: Namespace) -> None:
+def pdf_extract(args: Namespace) -> None:
     """
     Extract one or more pages from a PDF
     :param args: Argparse Results
     :type args: Namespace
     """
     pages_to_extract = flatten(list(map(parse_ranges, args.pages)))
-    reader = PyPDF2.PdfReader(args.input)
-    writer = PyPDF2.PdfWriter()
+    reader = PdfReader(args.input)
+    writer = PdfWriter()
 
     for page_num, page in enumerate(reader.pages):
         if page_num in pages_to_extract:
@@ -90,37 +90,31 @@ def cmd_extract(args: Namespace) -> None:
     writer.write(args.output)
 
 
-def cmd_rotate(args: Namespace) -> None:
+def pdf_rotate(args: Namespace) -> None:
     """
     Rotate one or more pages in a PDF
     :param args: Argparse Results
     :type args: Namespace
     """
     pages_to_rotate = flatten(list(map(parse_ranges, args.pages)))
-    reader = PyPDF2.PdfReader(args.input)
-    writer = PyPDF2.PdfWriter()
+    pdf = PdfWriter(args.input)
 
-    for page_num, page in enumerate(reader.pages):
-        if page_num in pages_to_rotate:
-            page.rotate(90)
-        writer.add_page(page)
+    for page_num in pages_to_rotate:
+        pdf.pages[page_num].rotate(90)
 
-    writer.write(args.output)
+    pdf.write(args.output)
 
 
-def cmd_delete(args: Namespace) -> None:
+def pdf_delete(args: Namespace) -> None:
     """
     Delete one or more pages from a PDF
     :param args: Argparse Results
     :type args: Namespace
     """
     pages_to_delete = flatten(list(map(parse_ranges, args.pages)))
-    reader = PyPDF2.PdfReader(args.input)
-    writer = PyPDF2.PdfWriter()
+    pdf = PdfWriter(args.input)
 
-    for page_num, page in enumerate(reader.pages):
-        if page_num in pages_to_delete:
-            continue
-        writer.add_page(page)
+    for page_num in pages_to_delete:
+        pdf.remove_page(page_num)
 
-    writer.write(args.output)
+    pdf.write(args.output)
