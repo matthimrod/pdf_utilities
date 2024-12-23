@@ -1,7 +1,4 @@
 from assertpy import assert_that
-from pypdf import PdfReader
-
-import pdf_utility
 
 TEST_PDF_1 = 'tests/test_pdf_1.pdf'
 TEST_PDF_2 = 'tests/test_pdf_2.pdf'

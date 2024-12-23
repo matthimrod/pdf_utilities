@@ -4,5 +4,5 @@ assertpy
 pytest-cov
 mypy
 pylint
-flake8
+flake8-pyproject
 bandit
